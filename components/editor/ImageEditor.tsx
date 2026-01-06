@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect, useRef, useLayoutEffect } from "react";
 import {
   Tool,
   Adjustments,
@@ -413,6 +413,16 @@ export function ImageEditor() {
     [selectedShapeId, saveToHistory]
   );
 
+  const handleUpdateShape = useCallback(
+    (id: string, updates: Partial<ShapeOverlay>) => {
+      setShapes((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, ...updates } : s))
+      );
+      saveToHistory();
+    },
+    [saveToHistory]
+  );
+
   // Handle export
   const handleExport = useCallback(async () => {
     if (!image) return;
@@ -589,6 +599,7 @@ export function ImageEditor() {
             selectedShapeId={selectedShapeId}
             onSelectShape={setSelectedShapeId}
             onRemoveShape={handleRemoveShape}
+            onUpdateShape={handleUpdateShape}
           />
         );
       case "crop":

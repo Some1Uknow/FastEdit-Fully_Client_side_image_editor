@@ -10,6 +10,7 @@ interface ShapesPanelProps {
   selectedShapeId: string | null;
   onSelectShape: (id: string | null) => void;
   onRemoveShape: (id: string) => void;
+  onUpdateShape: (id: string, updates: Partial<ShapeOverlay>) => void;
 }
 
 const COLORS = [
@@ -89,7 +90,37 @@ export function ShapesPanel({
   selectedShapeId,
   onSelectShape,
   onRemoveShape,
+  onUpdateShape,
 }: ShapesPanelProps) {
+  // Get the selected shape for displaying its current values
+  const selectedShape = selectedShapeId
+    ? shapes.find((s) => s.id === selectedShapeId)
+    : null;
+
+  // Helper to handle settings change - updates selected shape if one is selected
+  const handleSettingsChange = (newSettings: Partial<ShapeSettings>) => {
+    // Always update the settings for new shapes
+    onSettingsChange(newSettings);
+
+    // If a shape is selected, also update that shape
+    if (selectedShapeId && selectedShape) {
+      const shapeUpdates: Partial<ShapeOverlay> = {};
+      if (newSettings.fill !== undefined) shapeUpdates.fill = newSettings.fill;
+      if (newSettings.fillColor !== undefined) shapeUpdates.fillColor = newSettings.fillColor;
+      if (newSettings.strokeColor !== undefined) shapeUpdates.strokeColor = newSettings.strokeColor;
+      if (newSettings.strokeWidth !== undefined) shapeUpdates.strokeWidth = newSettings.strokeWidth;
+      
+      if (Object.keys(shapeUpdates).length > 0) {
+        onUpdateShape(selectedShapeId, shapeUpdates);
+      }
+    }
+  };
+
+  // Get display values - use selected shape values if selected, otherwise use settings
+  const displayFill = selectedShape ? selectedShape.fill : settings.fill;
+  const displayFillColor = selectedShape ? selectedShape.fillColor : settings.fillColor;
+  const displayStrokeColor = selectedShape ? selectedShape.strokeColor : settings.strokeColor;
+  const displayStrokeWidth = selectedShape ? selectedShape.strokeWidth : settings.strokeWidth;
   return (
     <div className="flex h-full w-72 flex-col border-l border-gray-200 bg-white">
       {/* Header */}
@@ -129,33 +160,33 @@ export function ShapesPanel({
         <div className="mb-6">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-              Fill
+              Fill {selectedShape && <span className="text-blue-500">(editing)</span>}
             </h3>
             <button
-              onClick={() => onSettingsChange({ fill: !settings.fill })}
+              onClick={() => handleSettingsChange({ fill: !displayFill })}
               className={`
                 rounded px-2 py-0.5 text-xs transition-all
                 ${
-                  settings.fill
+                  displayFill
                     ? "bg-gray-200 text-gray-900"
                     : "bg-gray-100 text-gray-500"
                 }
               `}
             >
-              {settings.fill ? "On" : "Off"}
+              {displayFill ? "On" : "Off"}
             </button>
           </div>
-          {settings.fill && (
+          {displayFill && (
             <>
               <div className="grid grid-cols-5 gap-2">
                 {COLORS.map((color) => (
                   <button
                     key={color}
-                    onClick={() => onSettingsChange({ fillColor: color })}
+                    onClick={() => handleSettingsChange({ fillColor: color })}
                     className={`
                       aspect-square rounded-lg border transition-all
                       ${
-                        settings.fillColor === color
+                        displayFillColor === color
                           ? "ring-2 ring-gray-900 ring-offset-2"
                           : "border-gray-200 hover:scale-105"
                       }
@@ -168,9 +199,9 @@ export function ShapesPanel({
                 <label className="text-xs text-gray-500">Custom:</label>
                 <input
                   type="color"
-                  value={settings.fillColor}
+                  value={displayFillColor}
                   onChange={(e) =>
-                    onSettingsChange({ fillColor: e.target.value })
+                    handleSettingsChange({ fillColor: e.target.value })
                   }
                   className="h-8 w-full cursor-pointer rounded-lg border border-gray-200 bg-transparent"
                 />
@@ -182,17 +213,17 @@ export function ShapesPanel({
         {/* Stroke color */}
         <div className="mb-6">
           <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-            Stroke
+            Stroke {selectedShape && <span className="text-blue-500">(editing)</span>}
           </h3>
           <div className="grid grid-cols-5 gap-2">
             {COLORS.map((color) => (
               <button
                 key={color}
-                onClick={() => onSettingsChange({ strokeColor: color })}
+                onClick={() => handleSettingsChange({ strokeColor: color })}
                 className={`
                   aspect-square rounded-lg border transition-all
                   ${
-                    settings.strokeColor === color
+                    displayStrokeColor === color
                       ? "ring-2 ring-gray-900 ring-offset-2"
                       : "border-gray-200 hover:scale-105"
                   }
@@ -205,9 +236,9 @@ export function ShapesPanel({
             <label className="text-xs text-gray-500">Custom:</label>
             <input
               type="color"
-              value={settings.strokeColor}
+              value={displayStrokeColor}
               onChange={(e) =>
-                onSettingsChange({ strokeColor: e.target.value })
+                handleSettingsChange({ strokeColor: e.target.value })
               }
               className="h-8 w-full cursor-pointer rounded-lg border border-gray-200 bg-transparent"
             />
@@ -217,21 +248,21 @@ export function ShapesPanel({
         {/* Stroke width */}
         <div className="mb-6">
           <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-            Stroke Width
+            Stroke Width {selectedShape && <span className="text-blue-500">(editing)</span>}
           </h3>
           <input
             type="range"
             min={1}
             max={20}
-            value={settings.strokeWidth}
+            value={displayStrokeWidth}
             onChange={(e) =>
-              onSettingsChange({ strokeWidth: Number(e.target.value) })
+              handleSettingsChange({ strokeWidth: Number(e.target.value) })
             }
             className="w-full cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-gray-200 [&::-webkit-slider-thumb]:mt-[-4px] [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gray-900"
           />
           <div className="mt-1 flex justify-between text-xs text-gray-400">
             <span>1px</span>
-            <span>{settings.strokeWidth}px</span>
+            <span>{displayStrokeWidth}px</span>
             <span>20px</span>
           </div>
         </div>

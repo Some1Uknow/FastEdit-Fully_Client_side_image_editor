@@ -84,6 +84,7 @@ function Slider({ label, value, min, max, onChange }: SliderProps) {
         />
         {/* Input */}
         <input
+        aria-label="range"
           type="range"
           min={min}
           max={max}
