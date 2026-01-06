@@ -29,6 +29,7 @@ import { CropPanel } from "./CropPanel";
 import { ExportPanel } from "./ExportPanel";
 import { exportImage } from "@/lib/export";
 import { UploadZone } from "./UploadZone";
+import GitHubBadge from "./GitHubBadge";
 
 export function ImageEditor() {
   // Image state
@@ -725,6 +726,10 @@ export function ImageEditor() {
               FastEdit
             </span>
           </div>
+
+          <div className="h-4 w-px bg-gray-200" />
+
+          <GitHubBadge owner="Some1Uknow" repo="FastEdit---Fully-Client-side-image-editor" />
 
           <div className="h-4 w-px bg-gray-200" />
 
