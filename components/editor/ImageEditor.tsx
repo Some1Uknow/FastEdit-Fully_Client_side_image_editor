@@ -632,7 +632,7 @@ export function ImageEditor() {
   };
 
   return (
-    <div className="flex h-screen w-full flex-col bg-[#fafafa]">
+    <div className="flex h-screen h-[100dvh] w-full flex-col bg-[#fafafa]">
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -644,11 +644,11 @@ export function ImageEditor() {
 
       {/* Floating Navbar - only show when no image is loaded */}
       {!image && (
-        <nav className="fixed left-1/2 top-4 z-50 flex -translate-x-1/2 items-center gap-6 rounded-full border border-gray-200 bg-white/80 px-6 py-3 backdrop-blur-xl shadow-sm transition-all hover:shadow-md">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black">
+        <nav className="fixed left-1/2 top-4 z-50 flex -translate-x-1/2 items-center gap-4 md:gap-6 rounded-full border border-gray-200 bg-white/80 px-4 md:px-6 py-2 md:py-3 backdrop-blur-xl shadow-sm transition-all hover:shadow-md">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full bg-black">
               <svg
-                className="h-4 w-4 text-white"
+                className="h-3 w-3 md:h-4 md:w-4 text-white"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -661,7 +661,7 @@ export function ImageEditor() {
                 />
               </svg>
             </div>
-            <span className="text-sm font-semibold tracking-tight text-gray-900">
+            <span className="text-xs md:text-sm font-semibold tracking-tight text-gray-900">
               FastEdit
             </span>
           </div>
@@ -671,10 +671,10 @@ export function ImageEditor() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="group flex items-center gap-2 rounded-full bg-gray-100 px-4 py-1.5 text-xs font-medium text-gray-700 transition-all hover:bg-gray-200"
+              className="group flex items-center gap-1.5 md:gap-2 rounded-full bg-gray-100 px-3 md:px-4 py-1 md:py-1.5 text-[10px] md:text-xs font-medium text-gray-700 transition-all hover:bg-gray-200"
             >
               <svg
-                className="h-3.5 w-3.5 text-gray-500 transition-colors group-hover:text-gray-700"
+                className="h-3 w-3 md:h-3.5 md:w-3.5 text-gray-500 transition-colors group-hover:text-gray-700"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -693,13 +693,13 @@ export function ImageEditor() {
       )}
 
       {/* Main content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 flex-col md:flex-row overflow-hidden">
         {/* Canvas area */}
-        <div ref={canvasContainerRef} className="relative flex flex-1 flex-col">
+        <div ref={canvasContainerRef} className="relative flex flex-1 flex-col min-h-0">
           {image ? (
             <>
               {/* Toolbar - positioned at top with proper spacing */}
-              <div className="absolute left-1/2 top-4 z-10 -translate-x-1/2">
+              <div className="absolute left-1/2 top-2 md:top-4 z-10 -translate-x-1/2">
                 <Toolbar
                   fileInputRef={fileInputRef}
                   activeTool={activeTool}
@@ -738,6 +738,7 @@ export function ImageEditor() {
                 textSettings={textSettings}
                 shapes={shapes}
                 onAddShape={handleAddShape}
+                onUpdateShape={handleUpdateShape}
                 selectedShapeId={selectedShapeId}
                 onSelectShape={setSelectedShapeId}
                 shapeSettings={shapeSettings}
@@ -753,7 +754,7 @@ export function ImageEditor() {
           )}
         </div>
 
-        {/* Side panel */}
+        {/* Side panel - bottom on mobile, side on desktop */}
         {image && renderPanel()}
       </div>
     </div>

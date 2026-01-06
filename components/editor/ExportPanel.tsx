@@ -37,26 +37,26 @@ export function ExportPanel({
   const outputHeight = Math.round(imageHeight * settings.scale);
 
   return (
-    <div className="flex h-full w-72 flex-col border-l border-gray-200 bg-white">
+    <div className="flex h-full w-full md:w-72 flex-col border-t md:border-t-0 md:border-l border-gray-200 bg-white max-h-[50vh] md:max-h-full">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2 md:py-3">
         <h2 className="text-sm font-semibold text-gray-900">Export</h2>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-3 md:p-4">
         {/* Format selection */}
-        <div className="mb-6">
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <div className="mb-4 md:mb-6">
+          <h3 className="mb-2 md:mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
             Format
           </h3>
-          <div className="space-y-2">
+          <div className="flex md:flex-col gap-2 md:space-y-2">
             {FORMATS.map((format) => (
               <button
                 key={format.value}
                 onClick={() => onSettingsChange({ format: format.value })}
                 className={`
-                  flex w-full items-start gap-3 rounded-lg p-3 text-left transition-all
+                  flex flex-1 md:w-full items-center md:items-start gap-2 md:gap-3 rounded-lg p-2 md:p-3 text-left transition-all
                   ${
                     settings.format === format.value
                       ? "bg-gray-100 ring-1 ring-gray-300"
@@ -79,10 +79,10 @@ export function ExportPanel({
                   )}
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-xs md:text-sm font-medium text-gray-900">
                     {format.label}
                   </span>
-                  <p className="mt-0.5 text-xs text-gray-500">
+                  <p className="hidden md:block mt-0.5 text-xs text-gray-500">
                     {format.description}
                   </p>
                 </div>
@@ -93,8 +93,8 @@ export function ExportPanel({
 
         {/* Quality slider (for JPEG and WebP) */}
         {(settings.format === "jpeg" || settings.format === "webp") && (
-          <div className="mb-6">
-            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+          <div className="mb-4 md:mb-6">
+            <h3 className="mb-2 md:mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
               Quality
             </h3>
             <div className="relative">
@@ -120,8 +120,8 @@ export function ExportPanel({
         )}
 
         {/* Scale selection */}
-        <div className="mb-6">
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <div className="mb-4 md:mb-6">
+          <h3 className="mb-2 md:mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
             Scale
           </h3>
           <div className="grid grid-cols-4 gap-2">
@@ -130,7 +130,7 @@ export function ExportPanel({
                 key={scale.value}
                 onClick={() => onSettingsChange({ scale: scale.value })}
                 className={`
-                  rounded-lg py-2 text-sm font-medium transition-all
+                  rounded-lg py-1.5 md:py-2 text-xs md:text-sm font-medium transition-all
                   ${
                     settings.scale === scale.value
                       ? "bg-gray-900 text-white"
@@ -145,13 +145,13 @@ export function ExportPanel({
         </div>
 
         {/* Output dimensions */}
-        <div className="mb-6 rounded-lg bg-gray-50 p-4">
-          <h4 className="mb-3 text-xs font-medium text-gray-600">
+        <div className="mb-4 md:mb-6 rounded-lg bg-gray-50 p-3 md:p-4">
+          <h4 className="mb-2 md:mb-3 text-xs font-medium text-gray-600">
             Output Dimensions
           </h4>
           <div className="flex items-center justify-between">
             <div className="text-center">
-              <p className="text-lg font-semibold text-gray-900">{outputWidth}</p>
+              <p className="text-base md:text-lg font-semibold text-gray-900">{outputWidth}</p>
               <p className="text-xs text-gray-500">Width</p>
             </div>
             <svg
@@ -168,7 +168,7 @@ export function ExportPanel({
               />
             </svg>
             <div className="text-center">
-              <p className="text-lg font-semibold text-gray-900">{outputHeight}</p>
+              <p className="text-base md:text-lg font-semibold text-gray-900">{outputHeight}</p>
               <p className="text-xs text-gray-500">Height</p>
             </div>
           </div>
@@ -178,7 +178,7 @@ export function ExportPanel({
         <button
           onClick={onExport}
           disabled={isExporting}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-900 py-3 text-sm font-semibold text-white transition-all hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-900 py-2.5 md:py-3 text-xs md:text-sm font-semibold text-white transition-all hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isExporting ? (
             <>
@@ -207,7 +207,7 @@ export function ExportPanel({
       </div>
 
       {/* Info */}
-      <div className="border-t border-gray-200 px-4 py-3">
+      <div className="border-t border-gray-200 px-4 py-2 md:py-3 hidden md:block">
         <p className="text-xs text-gray-400">
           Image will be downloaded to your device
         </p>

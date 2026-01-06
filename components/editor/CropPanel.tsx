@@ -87,26 +87,26 @@ export function CropPanel({
   hasCropRect,
 }: CropPanelProps) {
   return (
-    <div className="flex h-full w-72 flex-col border-l border-gray-200 bg-white">
+    <div className="flex h-full w-full md:w-72 flex-col border-t md:border-t-0 md:border-l border-gray-200 bg-white max-h-[50vh] md:max-h-full">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2 md:py-3">
         <h2 className="text-sm font-semibold text-gray-900">Crop</h2>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-3 md:p-4">
         {/* Aspect ratio */}
-        <div className="mb-6">
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <div className="mb-4 md:mb-6">
+          <h3 className="mb-2 md:mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
             Aspect Ratio
           </h3>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-4 md:grid-cols-2 gap-2">
             {ASPECT_RATIOS.map((ratio) => (
               <button
                 key={ratio.value}
                 onClick={() => onAspectRatioChange(ratio.value)}
                 className={`
-                  flex items-center gap-2 rounded-lg px-3 py-2.5 transition-all
+                  flex items-center justify-center md:justify-start gap-1 md:gap-2 rounded-lg px-2 md:px-3 py-2 md:py-2.5 transition-all
                   ${
                     aspectRatio === ratio.value
                       ? "bg-gray-900 text-white"
@@ -114,15 +114,15 @@ export function CropPanel({
                   }
                 `}
               >
-                {ratio.icon}
-                <span className="text-sm font-medium">{ratio.label}</span>
+                <span className="hidden md:block">{ratio.icon}</span>
+                <span className="text-xs md:text-sm font-medium">{ratio.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Instructions */}
-        <div className="mb-6 rounded-lg bg-gray-50 p-4">
+        {/* Instructions - hidden on mobile */}
+        <div className="mb-4 md:mb-6 rounded-lg bg-gray-50 p-3 md:p-4 hidden md:block">
           <h4 className="mb-2 text-xs font-medium text-gray-700">
             How to Crop
           </h4>
@@ -149,11 +149,11 @@ export function CropPanel({
         </div>
 
         {/* Action buttons */}
-        <div className="space-y-2">
+        <div className="flex md:flex-col gap-2 md:space-y-2">
           <button
             onClick={onApplyCrop}
             disabled={!hasCropRect}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-900 py-2.5 text-sm font-medium text-white transition-all hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex flex-1 md:w-full items-center justify-center gap-2 rounded-lg bg-gray-900 py-2 md:py-2.5 text-xs md:text-sm font-medium text-white transition-all hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <svg
               className="h-4 w-4"
@@ -168,11 +168,11 @@ export function CropPanel({
                 d="M4.5 12.75l6 6 9-13.5"
               />
             </svg>
-            Apply Crop
+            Apply
           </button>
           <button
             onClick={onCancelCrop}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-100 py-2.5 text-sm font-medium text-gray-600 transition-all hover:bg-gray-200 hover:text-gray-900"
+            className="flex flex-1 md:w-full items-center justify-center gap-2 rounded-lg bg-gray-100 py-2 md:py-2.5 text-xs md:text-sm font-medium text-gray-600 transition-all hover:bg-gray-200 hover:text-gray-900"
           >
             <svg
               className="h-4 w-4"
@@ -193,7 +193,7 @@ export function CropPanel({
       </div>
 
       {/* Status bar */}
-      <div className="border-t border-gray-200 px-4 py-3">
+      <div className="border-t border-gray-200 px-4 py-2 md:py-3">
         <div className="flex items-center gap-2">
           <div
             className={`h-2 w-2 rounded-full ${

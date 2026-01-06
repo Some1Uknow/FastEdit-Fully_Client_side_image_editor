@@ -30,7 +30,7 @@ function ToolButton({ active, onClick, title, children }: ToolButtonProps) {
       onClick={onClick}
       title={title}
       className={`
-        group relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200
+        group relative flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl transition-all duration-200 shrink-0
         ${
           active
             ? "bg-gray-900 text-white shadow-sm"
@@ -38,8 +38,8 @@ function ToolButton({ active, onClick, title, children }: ToolButtonProps) {
         }
       `}
     >
-      {children}
-      <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+      <span className="[&>svg]:h-4 [&>svg]:w-4 sm:[&>svg]:h-5 sm:[&>svg]:w-5">{children}</span>
+      <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 hidden sm:block">
         {title}
       </span>
     </button>
@@ -47,7 +47,7 @@ function ToolButton({ active, onClick, title, children }: ToolButtonProps) {
 }
 
 function Divider() {
-  return <div className="mx-1 h-6 w-px bg-gray-200" />;
+  return <div className="mx-0.5 sm:mx-1 h-6 w-px bg-gray-200 shrink-0" />;
 }
 
 export function Toolbar({
@@ -139,12 +139,12 @@ export function Toolbar({
   ];
 
   return (
-    <div className="flex items-center gap-1 rounded-2xl border border-gray-200 bg-white/80 px-3 py-2 shadow-sm backdrop-blur-xl">
+    <div className="flex items-center gap-0.5 sm:gap-1 rounded-xl sm:rounded-2xl border border-gray-200 bg-white/80 px-2 sm:px-3 py-1.5 sm:py-2 shadow-sm backdrop-blur-xl max-w-[calc(100vw-2rem)] overflow-x-auto scrollbar-hide">
       {/* Logo and Open Image */}
-      <div className="flex items-center gap-2 pr-1">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black">
+      <div className="flex items-center gap-1.5 sm:gap-2 pr-1 shrink-0">
+        <div className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-black">
           <svg
-            className="h-4 w-4 text-white"
+            className="h-3 w-3 sm:h-4 sm:w-4 text-white"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -160,10 +160,10 @@ export function Toolbar({
         <button
           onClick={() => fileInputRef.current?.click()}
           title="Open Image"
-          className="flex h-8 items-center gap-1.5 rounded-lg bg-gray-100 px-3 text-xs font-medium text-gray-700 transition-all hover:bg-gray-200"
+          className="flex h-6 sm:h-8 items-center gap-1 sm:gap-1.5 rounded-md sm:rounded-lg bg-gray-100 px-2 sm:px-3 text-[10px] sm:text-xs font-medium text-gray-700 transition-all hover:bg-gray-200 shrink-0"
         >
           <svg
-            className="h-3.5 w-3.5"
+            className="h-3 w-3 sm:h-3.5 sm:w-3.5"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -175,7 +175,7 @@ export function Toolbar({
               d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
             />
           </svg>
-          Open
+          <span className="hidden xs:inline">Open</span>
         </button>
       </div>
 
@@ -186,9 +186,9 @@ export function Toolbar({
         onClick={onUndo}
         disabled={!canUndo}
         title="Undo (Ctrl+Z)"
-        className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-30"
+        className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-30 shrink-0"
       >
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
         </svg>
       </button>
@@ -196,9 +196,9 @@ export function Toolbar({
         onClick={onRedo}
         disabled={!canRedo}
         title="Redo (Ctrl+Shift+Z)"
-        className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-30"
+        className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-30 shrink-0"
       >
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 000 12h3" />
         </svg>
       </button>
@@ -223,25 +223,25 @@ export function Toolbar({
       <button
         onClick={onZoomOut}
         title="Zoom Out (-)"
-        className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-900"
+        className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-900 shrink-0"
       >
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM13.5 10.5h-6" />
         </svg>
       </button>
       <button
         onClick={onZoomReset}
         title="Reset Zoom (0)"
-        className="flex h-10 min-w-[60px] items-center justify-center rounded-xl text-sm font-medium text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-900"
+        className="flex h-8 sm:h-10 min-w-[50px] sm:min-w-[60px] items-center justify-center rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-900 shrink-0"
       >
         {Math.round(zoom * 100)}%
       </button>
       <button
         onClick={onZoomIn}
         title="Zoom In (+)"
-        className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-900"
+        className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-900 shrink-0"
       >
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6" />
         </svg>
       </button>

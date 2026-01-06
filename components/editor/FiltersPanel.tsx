@@ -58,9 +58,9 @@ export function FiltersPanel({
   }, [previewImage]);
 
   return (
-    <div className="flex h-full w-72 flex-col border-l border-gray-200 bg-white">
+    <div className="flex h-full w-full md:w-72 flex-col border-t md:border-t-0 md:border-l border-gray-200 bg-white max-h-[50vh] md:max-h-full">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2 md:py-3">
         <h2 className="text-sm font-semibold text-gray-900">Filters</h2>
         {activeFilter && activeFilter !== "none" && (
           <button
@@ -73,8 +73,8 @@ export function FiltersPanel({
       </div>
 
       {/* Filter grid */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="grid grid-cols-2 gap-3">
+      <div className="flex-1 overflow-y-auto p-3 md:p-4">
+        <div className="grid grid-cols-3 md:grid-cols-2 gap-2 md:gap-3">
           {FILTER_PRESETS.map((filter) => (
             <button
               key={filter.id}

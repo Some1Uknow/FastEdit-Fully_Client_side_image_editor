@@ -122,17 +122,17 @@ export function ShapesPanel({
   const displayStrokeColor = selectedShape ? selectedShape.strokeColor : settings.strokeColor;
   const displayStrokeWidth = selectedShape ? selectedShape.strokeWidth : settings.strokeWidth;
   return (
-    <div className="flex h-full w-72 flex-col border-l border-gray-200 bg-white">
+    <div className="flex h-full w-full md:w-72 flex-col border-t md:border-t-0 md:border-l border-gray-200 bg-white max-h-[50vh] md:max-h-full">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2 md:py-3">
         <h2 className="text-sm font-semibold text-gray-900">Shapes</h2>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-3 md:p-4">
         {/* Shape selection */}
-        <div className="mb-6">
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <div className="mb-4 md:mb-6">
+          <h3 className="mb-2 md:mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
             Shape
           </h3>
           <div className="grid grid-cols-3 gap-2">
@@ -211,8 +211,8 @@ export function ShapesPanel({
         </div>
 
         {/* Stroke color */}
-        <div className="mb-6">
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <div className="mb-4 md:mb-6">
+          <h3 className="mb-2 md:mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
             Stroke {selectedShape && <span className="text-blue-500">(editing)</span>}
           </h3>
           <div className="grid grid-cols-5 gap-2">
@@ -232,7 +232,7 @@ export function ShapesPanel({
               />
             ))}
           </div>
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-2 md:mt-3 flex items-center gap-2">
             <label className="text-xs text-gray-500">Custom:</label>
             <input
               type="color"
@@ -246,8 +246,8 @@ export function ShapesPanel({
         </div>
 
         {/* Stroke width */}
-        <div className="mb-6">
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <div className="mb-4 md:mb-6">
+          <h3 className="mb-2 md:mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
             Stroke Width {selectedShape && <span className="text-blue-500">(editing)</span>}
           </h3>
           <input
@@ -269,8 +269,8 @@ export function ShapesPanel({
 
         {/* Shape layers */}
         {shapes.length > 0 && (
-          <div className="mb-6">
-            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+          <div className="mb-4 md:mb-6">
+            <h3 className="mb-2 md:mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
               Shape Layers
             </h3>
             <div className="space-y-2">
@@ -329,7 +329,7 @@ export function ShapesPanel({
         )}
 
         {/* Tips */}
-        <div className="rounded-lg bg-gray-50 p-3">
+        <div className="rounded-lg bg-gray-50 p-3 hidden md:block">
           <h4 className="mb-2 text-xs font-medium text-gray-700">Tips</h4>
           <ul className="space-y-1 text-xs text-gray-500">
             <li>• Click and drag to draw shapes</li>

@@ -164,9 +164,9 @@ export function AdjustmentsPanel({
   ];
 
   return (
-    <div className="flex h-full w-72 flex-col border-l border-gray-200 bg-white">
+    <div className="flex h-full w-full md:w-72 flex-col border-t md:border-t-0 md:border-l border-gray-200 bg-white max-h-[50vh] md:max-h-full">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2 md:py-3">
         <h2 className="text-sm font-semibold text-gray-900">Adjustments</h2>
         <button
           onClick={handleResetAdjustments}
@@ -177,9 +177,9 @@ export function AdjustmentsPanel({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-3 md:p-4">
         {/* Transform section */}
-        <div className="mb-6">
+        <div className="mb-4 md:mb-6">
           <SectionTitle>Transform</SectionTitle>
           <div className="flex items-center gap-2">
             <ActionButton onClick={() => onRotate(-90)} title="Rotate Left">
@@ -246,9 +246,9 @@ export function AdjustmentsPanel({
         </div>
 
         {/* Light section */}
-        <div className="mb-6">
+        <div className="mb-4 md:mb-6">
           <SectionTitle>Light</SectionTitle>
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {adjustmentSliders.slice(0, 5).map((slider) => (
               <Slider
                 key={slider.key}
@@ -263,9 +263,9 @@ export function AdjustmentsPanel({
         </div>
 
         {/* Color section */}
-        <div className="mb-6">
+        <div className="mb-4 md:mb-6">
           <SectionTitle>Color</SectionTitle>
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {adjustmentSliders.slice(5, 10).map((slider) => (
               <Slider
                 key={slider.key}
@@ -280,9 +280,9 @@ export function AdjustmentsPanel({
         </div>
 
         {/* Effects section */}
-        <div className="mb-6">
+        <div className="mb-4 md:mb-6">
           <SectionTitle>Effects</SectionTitle>
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {adjustmentSliders.slice(10).map((slider) => (
               <Slider
                 key={slider.key}

@@ -137,6 +137,7 @@ interface CanvasProps {
   textSettings: TextSettings;
   shapes: ShapeOverlay[];
   onAddShape: (shape: ShapeOverlay) => void;
+  onUpdateShape: (id: string, updates: Partial<ShapeOverlay>) => void;
   selectedShapeId: string | null;
   onSelectShape: (id: string | null) => void;
   shapeSettings: ShapeSettings;
@@ -164,6 +165,7 @@ export function Canvas({
   textSettings,
   shapes,
   onAddShape,
+  onUpdateShape,
   selectedShapeId,
   onSelectShape,
   shapeSettings,
@@ -483,9 +485,9 @@ export function Canvas({
     shapes,
   ]);
 
-  // FIXED: Get canvas coordinates from mouse event with proper transformation
+  // FIXED: Get canvas coordinates from mouse or touch event with proper transformation
   const getCanvasCoords = useCallback(
-    (e: React.MouseEvent | MouseEvent) => {
+    (e: React.MouseEvent | MouseEvent | React.TouchEvent | TouchEvent | { clientX: number; clientY: number }) => {
       if (!canvasWrapperRef.current || !canvasRef.current || !image) {
         return { x: 0, y: 0 };
       }
@@ -497,9 +499,24 @@ export function Canvas({
       const scaleX = image.width / wrapperRect.width;
       const scaleY = image.height / wrapperRect.height;
 
-      // Get mouse position relative to the wrapper
-      const mouseX = e.clientX - wrapperRect.left;
-      const mouseY = e.clientY - wrapperRect.top;
+      // Get client coordinates from mouse or touch event
+      let clientX: number, clientY: number;
+      if ('touches' in e && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else if ('changedTouches' in e && e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
+      } else if ('clientX' in e) {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      } else {
+        return { x: 0, y: 0 };
+      }
+
+      // Get position relative to the wrapper
+      const mouseX = clientX - wrapperRect.left;
+      const mouseY = clientY - wrapperRect.top;
 
       // Convert to canvas coordinates
       const x = mouseX * scaleX;
@@ -708,7 +725,10 @@ export function Canvas({
 
       // Handle shape dragging
       if (draggingShape) {
-        // Shapes are not draggable after creation in current implementation
+        onUpdateShape(draggingShape, {
+          x: coords.x - dragOffset.x,
+          y: coords.y - dragOffset.y,
+        });
         return;
       }
 
@@ -925,6 +945,322 @@ export function Canvas({
     []
   );
 
+  // Touch handlers for mobile support
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (!image || e.touches.length !== 1) return;
+      e.preventDefault();
+      
+      const touch = e.touches[0];
+      const coords = getCanvasCoords(touch);
+
+      // Check if clicking on text
+      if (activeTool === "text" || activeTool === "select") {
+        for (const text of texts) {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          if (!ctx) continue;
+
+          ctx.font = `${text.italic ? "italic " : ""}${text.bold ? "bold " : ""}${
+            text.fontSize
+          }px ${text.fontFamily}`;
+          const metrics = ctx.measureText(text.text);
+          const width = metrics.width;
+          const height = text.fontSize * 1.2;
+
+          let x = text.x;
+          if (text.align === "center") x -= width / 2;
+          else if (text.align === "right") x -= width;
+
+          if (
+            coords.x >= x &&
+            coords.x <= x + width &&
+            coords.y >= text.y &&
+            coords.y <= text.y + height
+          ) {
+            onSelectText(text.id);
+            setDraggingText(text.id);
+            setDragOffset({ x: coords.x - text.x, y: coords.y - text.y });
+            return;
+          }
+        }
+      }
+
+      // Check if clicking on shape
+      if (activeTool === "shapes" || activeTool === "select") {
+        for (const shape of shapes) {
+          if (
+            coords.x >= shape.x &&
+            coords.x <= shape.x + shape.width &&
+            coords.y >= shape.y &&
+            coords.y <= shape.y + shape.height
+          ) {
+            onSelectShape(shape.id);
+            setDraggingShape(shape.id);
+            setDragOffset({ x: coords.x - shape.x, y: coords.y - shape.y });
+            return;
+          }
+        }
+      }
+
+      // Deselect
+      onSelectText(null);
+      onSelectShape(null);
+
+      switch (activeTool) {
+        case "select":
+          setIsPanning(true);
+          setLastPanPoint({ x: touch.clientX, y: touch.clientY });
+          break;
+
+        case "crop":
+          if (cropRect) {
+            const handle = getCropHandle(coords);
+            if (handle) {
+              setCropHandle(handle);
+              setInitialCropRect({ ...cropRect });
+              setCropStart(coords);
+              return;
+            }
+          }
+          setCropStart(coords);
+          setCropHandle(null);
+          setInitialCropRect(null);
+          onCropRectChange(null);
+          break;
+
+        case "draw":
+          setIsDrawing(true);
+          setCurrentPath([coords]);
+          break;
+
+        case "shapes":
+          setShapeStart(coords);
+          break;
+      }
+    },
+    [
+      image,
+      activeTool,
+      texts,
+      shapes,
+      cropRect,
+      getCanvasCoords,
+      getCropHandle,
+      onSelectText,
+      onSelectShape,
+      onCropRectChange,
+    ]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!image || e.touches.length !== 1) return;
+      e.preventDefault();
+
+      const touch = e.touches[0];
+      const coords = getCanvasCoords(touch);
+
+      // Handle text dragging
+      if (draggingText) {
+        onUpdateText(draggingText, {
+          x: coords.x - dragOffset.x,
+          y: coords.y - dragOffset.y,
+        });
+        return;
+      }
+
+      // Handle shape dragging
+      if (draggingShape) {
+        onUpdateShape(draggingShape, {
+          x: coords.x - dragOffset.x,
+          y: coords.y - dragOffset.y,
+        });
+        return;
+      }
+
+      if (isPanning) {
+        const dx = touch.clientX - lastPanPoint.x;
+        const dy = touch.clientY - lastPanPoint.y;
+        onPanChange({ x: pan.x + dx, y: pan.y + dy });
+        setLastPanPoint({ x: touch.clientX, y: touch.clientY });
+        return;
+      }
+
+      // Handle crop resize/move
+      if (activeTool === "crop" && cropStart && cropHandle && initialCropRect) {
+        const dx = coords.x - cropStart.x;
+        const dy = coords.y - cropStart.y;
+        const ratio = getAspectRatioValue();
+
+        const newRect = { ...initialCropRect };
+
+        switch (cropHandle) {
+          case "move":
+            newRect.x = Math.max(0, Math.min(image.width - newRect.width, initialCropRect.x + dx));
+            newRect.y = Math.max(0, Math.min(image.height - newRect.height, initialCropRect.y + dy));
+            break;
+          case "nw":
+            newRect.x = initialCropRect.x + dx;
+            newRect.y = initialCropRect.y + dy;
+            newRect.width = initialCropRect.width - dx;
+            newRect.height = ratio ? newRect.width / ratio : initialCropRect.height - dy;
+            break;
+          case "ne":
+            newRect.y = initialCropRect.y + dy;
+            newRect.width = initialCropRect.width + dx;
+            newRect.height = ratio ? newRect.width / ratio : initialCropRect.height - dy;
+            break;
+          case "sw":
+            newRect.x = initialCropRect.x + dx;
+            newRect.width = initialCropRect.width - dx;
+            newRect.height = ratio ? newRect.width / ratio : initialCropRect.height + dy;
+            break;
+          case "se":
+            newRect.width = initialCropRect.width + dx;
+            newRect.height = ratio ? newRect.width / ratio : initialCropRect.height + dy;
+            break;
+          case "n":
+            newRect.y = initialCropRect.y + dy;
+            newRect.height = initialCropRect.height - dy;
+            if (ratio) newRect.width = newRect.height * ratio;
+            break;
+          case "s":
+            newRect.height = initialCropRect.height + dy;
+            if (ratio) newRect.width = newRect.height * ratio;
+            break;
+          case "w":
+            newRect.x = initialCropRect.x + dx;
+            newRect.width = initialCropRect.width - dx;
+            if (ratio) newRect.height = newRect.width / ratio;
+            break;
+          case "e":
+            newRect.width = initialCropRect.width + dx;
+            if (ratio) newRect.height = newRect.width / ratio;
+            break;
+        }
+
+        if (newRect.width > 10 && newRect.height > 10) {
+          onCropRectChange({
+            x: Math.max(0, newRect.x),
+            y: Math.max(0, newRect.y),
+            width: Math.min(newRect.width, image.width - newRect.x),
+            height: Math.min(newRect.height, image.height - newRect.y),
+          });
+        }
+        return;
+      }
+
+      // Handle crop creation
+      if (activeTool === "crop" && cropStart && !cropHandle) {
+        const x = Math.min(cropStart.x, coords.x);
+        const y = Math.min(cropStart.y, coords.y);
+        let width = Math.abs(coords.x - cropStart.x);
+        let height = Math.abs(coords.y - cropStart.y);
+
+        const ratio = getAspectRatioValue();
+        if (ratio) {
+          height = width / ratio;
+        }
+
+        onCropRectChange({
+          x: Math.max(0, x),
+          y: Math.max(0, y),
+          width: Math.min(width, image.width - x),
+          height: Math.min(height, image.height - y),
+        });
+        return;
+      }
+
+      // Handle drawing
+      if (activeTool === "draw" && isDrawing) {
+        setCurrentPath((prev) => [...prev, coords]);
+        return;
+      }
+
+      // Handle shape creation
+      if (activeTool === "shapes" && shapeStart) {
+        const width = coords.x - shapeStart.x;
+        const height = coords.y - shapeStart.y;
+        const x = width > 0 ? shapeStart.x : shapeStart.x + width;
+        const y = height > 0 ? shapeStart.y : shapeStart.y + height;
+
+        setCurrentShape({
+          id: `shape-${Date.now()}`,
+          type: shapeSettings.type,
+          x,
+          y,
+          width: Math.abs(width),
+          height: Math.abs(height),
+          fill: shapeSettings.fill,
+          fillColor: shapeSettings.fillColor,
+          strokeColor: shapeSettings.strokeColor,
+          strokeWidth: shapeSettings.strokeWidth,
+        });
+      }
+    },
+    [
+      image,
+      isPanning,
+      lastPanPoint,
+      pan,
+      onPanChange,
+      activeTool,
+      cropStart,
+      cropHandle,
+      initialCropRect,
+      isDrawing,
+      shapeStart,
+      shapeSettings,
+      getCanvasCoords,
+      getAspectRatioValue,
+      onCropRectChange,
+      draggingText,
+      draggingShape,
+      dragOffset,
+      onUpdateText,
+      onUpdateShape,
+    ]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    setIsPanning(false);
+    setCropStart(null);
+    setCropHandle(null);
+    setInitialCropRect(null);
+    setDraggingText(null);
+    setDraggingShape(null);
+
+    if (activeTool === "draw" && isDrawing && currentPath.length > 1) {
+      onAddDrawingPath({
+        id: `path-${Date.now()}`,
+        points: currentPath,
+        color: drawingSettings.tool === "eraser" ? "#000" : drawingSettings.color,
+        size: drawingSettings.size,
+        tool: drawingSettings.tool,
+      });
+    }
+
+    if (activeTool === "shapes" && currentShape) {
+      if (currentShape.width > 5 && currentShape.height > 5) {
+        onAddShape(currentShape);
+      }
+      setCurrentShape(null);
+    }
+
+    setIsDrawing(false);
+    setCurrentPath([]);
+    setShapeStart(null);
+  }, [
+    activeTool,
+    isDrawing,
+    currentPath,
+    drawingSettings,
+    onAddDrawingPath,
+    currentShape,
+    onAddShape,
+  ]);
+
   // Get cursor style based on tool and position
   const getCursor = useCallback(() => {
     if (activeTool === "select") {
@@ -970,11 +1306,15 @@ export function Canvas({
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden bg-[#1a1a1a]"
+      className="relative h-full w-full overflow-hidden bg-[#1a1a1a] touch-none"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
       onWheel={handleWheel}
       style={{ cursor: getCursor() }}
     >
