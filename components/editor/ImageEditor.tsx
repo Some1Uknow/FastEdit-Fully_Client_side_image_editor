@@ -103,28 +103,74 @@ export function ImageEditor() {
   // History state
   const [history, setHistory] = useState<HistoryState[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-
-  // Save state to history
-  const saveToHistory = useCallback(() => {
-    const state: HistoryState = {
-      adjustments: { ...adjustments },
-      transform: { ...transform },
-      drawingPaths: [...drawingPaths],
-      texts: [...texts],
-      shapes: [...shapes],
-      cropRect: cropRect ? { ...cropRect } : null,
+  const isRestoringRef = useRef(false);
+  const historyIndexRef = useRef(-1);
+  
+  // Keep historyIndex ref in sync
+  useEffect(() => {
+    historyIndexRef.current = historyIndex;
+  }, [historyIndex]);
+  
+  // Refs to track latest state values for history saving
+  const stateRef = useRef({
+    adjustments,
+    transform,
+    drawingPaths,
+    texts,
+    shapes,
+    cropRect,
+  });
+  
+  // Keep state ref in sync
+  useEffect(() => {
+    stateRef.current = {
+      adjustments,
+      transform,
+      drawingPaths,
+      texts,
+      shapes,
+      cropRect,
     };
+  }, [adjustments, transform, drawingPaths, texts, shapes, cropRect]);
 
-    setHistory((prev) => {
-      const newHistory = prev.slice(0, historyIndex + 1);
-      return [...newHistory, state];
-    });
-    setHistoryIndex((prev) => prev + 1);
-  }, [adjustments, transform, drawingPaths, texts, shapes, cropRect, historyIndex]);
+  // Save state to history - uses setTimeout to run after React batch completes
+  const saveToHistory = useCallback(() => {
+    // Skip if we're restoring from history (undo/redo)
+    if (isRestoringRef.current) return;
+    
+    // Use setTimeout(0) to ensure React batch has completed
+    setTimeout(() => {
+      if (isRestoringRef.current) return;
+      
+      const current = stateRef.current;
+      const currentIdx = historyIndexRef.current;
+      
+      // Deep clone to avoid reference issues
+      const state: HistoryState = {
+        adjustments: { ...current.adjustments },
+        transform: { ...current.transform },
+        drawingPaths: current.drawingPaths.map(p => ({ 
+          ...p, 
+          points: p.points.map(pt => ({ ...pt })) 
+        })),
+        texts: current.texts.map(t => ({ ...t })),
+        shapes: current.shapes.map(s => ({ ...s })),
+        cropRect: current.cropRect ? { ...current.cropRect } : null,
+      };
+
+      setHistory((prev) => {
+        const newHistory = prev.slice(0, currentIdx + 1);
+        return [...newHistory, state];
+      });
+      historyIndexRef.current = currentIdx + 1;
+      setHistoryIndex(currentIdx + 1);
+    }, 0);
+  }, []);
 
   // Undo
   const handleUndo = useCallback(() => {
     if (historyIndex > 0) {
+      isRestoringRef.current = true;
       const prevState = history[historyIndex - 1];
       setAdjustments(prevState.adjustments);
       setTransform(prevState.transform);
@@ -132,13 +178,19 @@ export function ImageEditor() {
       setTexts(prevState.texts);
       setShapes(prevState.shapes);
       setCropRect(prevState.cropRect);
-      setHistoryIndex((prev) => prev - 1);
+      historyIndexRef.current = historyIndex - 1;
+      setHistoryIndex(historyIndex - 1);
+      // Reset restoring flag after React batch completes
+      setTimeout(() => {
+        isRestoringRef.current = false;
+      }, 0);
     }
   }, [history, historyIndex]);
 
   // Redo
   const handleRedo = useCallback(() => {
     if (historyIndex < history.length - 1) {
+      isRestoringRef.current = true;
       const nextState = history[historyIndex + 1];
       setAdjustments(nextState.adjustments);
       setTransform(nextState.transform);
@@ -146,7 +198,12 @@ export function ImageEditor() {
       setTexts(nextState.texts);
       setShapes(nextState.shapes);
       setCropRect(nextState.cropRect);
-      setHistoryIndex((prev) => prev + 1);
+      historyIndexRef.current = historyIndex + 1;
+      setHistoryIndex(historyIndex + 1);
+      // Reset restoring flag after React batch completes
+      setTimeout(() => {
+        isRestoringRef.current = false;
+      }, 0);
     }
   }, [history, historyIndex]);
 
@@ -191,6 +248,7 @@ export function ImageEditor() {
       setCropRect(null);
       setActiveFilter(null);
       setHistory([]);
+      historyIndexRef.current = -1;
       setHistoryIndex(-1);
 
       // Save initial state
@@ -205,6 +263,7 @@ export function ImageEditor() {
             cropRect: null,
           },
         ]);
+        historyIndexRef.current = 0;
         setHistoryIndex(0);
         setIsLoading(false);
       }, 0);
@@ -418,9 +477,10 @@ export function ImageEditor() {
       setShapes((prev) =>
         prev.map((s) => (s.id === id ? { ...s, ...updates } : s))
       );
-      saveToHistory();
+      // Note: Don't save to history here - it's called on every drag frame
+      // History is saved via onDragEnd callback when drag completes
     },
-    [saveToHistory]
+    []
   );
 
   // Handle export
@@ -742,6 +802,7 @@ export function ImageEditor() {
                 selectedShapeId={selectedShapeId}
                 onSelectShape={setSelectedShapeId}
                 shapeSettings={shapeSettings}
+                onDragEnd={saveToHistory}
               />
             </>
           ) : (

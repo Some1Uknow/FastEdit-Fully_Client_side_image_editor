@@ -141,6 +141,7 @@ interface CanvasProps {
   selectedShapeId: string | null;
   onSelectShape: (id: string | null) => void;
   shapeSettings: ShapeSettings;
+  onDragEnd?: () => void;
 }
 
 export function Canvas({
@@ -169,6 +170,7 @@ export function Canvas({
   selectedShapeId,
   onSelectShape,
   shapeSettings,
+  onDragEnd,
 }: CanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
@@ -897,12 +899,20 @@ export function Canvas({
   );
 
   const handleMouseUp = useCallback(() => {
+    // Check if we were dragging before clearing state
+    const wasDragging = draggingText !== null || draggingShape !== null;
+    
     setIsPanning(false);
     setCropStart(null);
     setCropHandle(null);
     setInitialCropRect(null);
     setDraggingText(null);
     setDraggingShape(null);
+
+    // Notify parent that drag ended so it can save to history
+    if (wasDragging && onDragEnd) {
+      onDragEnd();
+    }
 
     if (activeTool === "draw" && isDrawing && currentPath.length > 1) {
       onAddDrawingPath({
@@ -932,6 +942,9 @@ export function Canvas({
     onAddDrawingPath,
     currentShape,
     onAddShape,
+    draggingText,
+    draggingShape,
+    onDragEnd,
   ]);
 
   // Handle wheel zoom
@@ -1224,12 +1237,20 @@ export function Canvas({
   );
 
   const handleTouchEnd = useCallback(() => {
+    // Check if we were dragging before clearing state
+    const wasDragging = draggingText !== null || draggingShape !== null;
+    
     setIsPanning(false);
     setCropStart(null);
     setCropHandle(null);
     setInitialCropRect(null);
     setDraggingText(null);
     setDraggingShape(null);
+
+    // Notify parent that drag ended so it can save to history
+    if (wasDragging && onDragEnd) {
+      onDragEnd();
+    }
 
     if (activeTool === "draw" && isDrawing && currentPath.length > 1) {
       onAddDrawingPath({
@@ -1259,6 +1280,9 @@ export function Canvas({
     onAddDrawingPath,
     currentShape,
     onAddShape,
+    draggingText,
+    draggingShape,
+    onDragEnd,
   ]);
 
   // Get cursor style based on tool and position
